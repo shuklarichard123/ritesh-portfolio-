@@ -16,14 +16,14 @@ export default function Home() {
         </div>
         <nav className="home-nav" aria-label="Portfolio sections">
           <Link to="/products" className="nav-card">
-            <span className="nav-card-icon" aria-hidden="true">📦</span>
+            <span className="nav-card-icon" aria-hidden="true">🛒</span>
             <span className="nav-card-title">Product Portfolio</span>
-            <span className="nav-card-desc">Projects, tools &amp; solutions I've built</span>
+            <span className="nav-card-desc">FMCG product range across 5 categories</span>
           </Link>
           <Link to="/regions" className="nav-card">
-            <span className="nav-card-icon" aria-hidden="true">🌏</span>
+            <span className="nav-card-icon" aria-hidden="true">🌍</span>
             <span className="nav-card-title">Region of Operation</span>
-            <span className="nav-card-desc">AWS regions &amp; global deployment footprint</span>
+            <span className="nav-card-desc">Americas, Europe &amp; Asia market presence</span>
           </Link>
         </nav>
       </section>

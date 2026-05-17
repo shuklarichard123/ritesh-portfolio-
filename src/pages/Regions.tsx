@@ -1,58 +1,218 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './Regions.css'
 
-interface Region {
-  code: string
+type RegionKey = 'americas' | 'europe' | 'asia'
+
+interface Country {
   name: string
-  location: string
   flag: string
-  services: string[]
-  primary: boolean
+  cities: string[]
+  status: 'active' | 'expanding' | 'planned'
+  channels: string[]
+  marketShare: string
 }
 
-const regions: Region[] = [
+interface RegionData {
+  key: RegionKey
+  label: string
+  emoji: string
+  tagline: string
+  countries: Country[]
+  highlights: { label: string; value: string }[]
+}
+
+const regions: RegionData[] = [
   {
-    code: 'ap-south-1',
-    name: 'Asia Pacific (Mumbai)',
-    location: 'Mumbai, India',
-    flag: '🇮🇳',
-    services: ['EC2', 'S3', 'RDS', 'Lambda', 'CloudFront', 'CodePipeline'],
-    primary: true,
+    key: 'americas',
+    label: 'Americas',
+    emoji: '🌎',
+    tagline: 'North & South America operations',
+    highlights: [
+      { label: 'Countries', value: '4' },
+      { label: 'Distribution Centres', value: '12' },
+      { label: 'Retail Partners', value: '3,200+' },
+      { label: 'Annual Revenue', value: '$48M' },
+    ],
+    countries: [
+      {
+        name: 'United States',
+        flag: '🇺🇸',
+        cities: ['New York', 'Los Angeles', 'Chicago', 'Houston'],
+        status: 'active',
+        channels: ['Supermarkets', 'E-commerce', 'Wholesale', 'Convenience'],
+        marketShare: '18%',
+      },
+      {
+        name: 'Canada',
+        flag: '🇨🇦',
+        cities: ['Toronto', 'Vancouver', 'Montreal'],
+        status: 'active',
+        channels: ['Supermarkets', 'E-commerce', 'Wholesale'],
+        marketShare: '12%',
+      },
+      {
+        name: 'Brazil',
+        flag: '🇧🇷',
+        cities: ['São Paulo', 'Rio de Janeiro'],
+        status: 'expanding',
+        channels: ['Supermarkets', 'Wholesale'],
+        marketShare: '6%',
+      },
+      {
+        name: 'Mexico',
+        flag: '🇲🇽',
+        cities: ['Mexico City', 'Guadalajara'],
+        status: 'expanding',
+        channels: ['Supermarkets', 'Convenience'],
+        marketShare: '5%',
+      },
+    ],
   },
   {
-    code: 'us-east-1',
-    name: 'US East (N. Virginia)',
-    location: 'Virginia, USA',
-    flag: '🇺🇸',
-    services: ['S3', 'CloudFront', 'Route 53', 'IAM', 'ACM'],
-    primary: false,
+    key: 'europe',
+    label: 'Europe',
+    emoji: '🌍',
+    tagline: 'Western, Central & Eastern Europe',
+    highlights: [
+      { label: 'Countries', value: '7' },
+      { label: 'Distribution Centres', value: '18' },
+      { label: 'Retail Partners', value: '5,800+' },
+      { label: 'Annual Revenue', value: '$72M' },
+    ],
+    countries: [
+      {
+        name: 'United Kingdom',
+        flag: '🇬🇧',
+        cities: ['London', 'Manchester', 'Birmingham', 'Edinburgh'],
+        status: 'active',
+        channels: ['Supermarkets', 'E-commerce', 'Wholesale', 'Convenience'],
+        marketShare: '22%',
+      },
+      {
+        name: 'Germany',
+        flag: '🇩🇪',
+        cities: ['Berlin', 'Munich', 'Hamburg', 'Frankfurt'],
+        status: 'active',
+        channels: ['Supermarkets', 'Wholesale', 'Discount Retail'],
+        marketShare: '19%',
+      },
+      {
+        name: 'France',
+        flag: '🇫🇷',
+        cities: ['Paris', 'Lyon', 'Marseille'],
+        status: 'active',
+        channels: ['Supermarkets', 'E-commerce', 'Specialty Stores'],
+        marketShare: '15%',
+      },
+      {
+        name: 'Netherlands',
+        flag: '🇳🇱',
+        cities: ['Amsterdam', 'Rotterdam'],
+        status: 'active',
+        channels: ['Supermarkets', 'E-commerce'],
+        marketShare: '11%',
+      },
+      {
+        name: 'Spain',
+        flag: '🇪🇸',
+        cities: ['Madrid', 'Barcelona'],
+        status: 'expanding',
+        channels: ['Supermarkets', 'Wholesale'],
+        marketShare: '8%',
+      },
+      {
+        name: 'Italy',
+        flag: '🇮🇹',
+        cities: ['Milan', 'Rome'],
+        status: 'expanding',
+        channels: ['Supermarkets', 'Specialty Stores'],
+        marketShare: '7%',
+      },
+      {
+        name: 'Poland',
+        flag: '🇵🇱',
+        cities: ['Warsaw', 'Kraków'],
+        status: 'planned',
+        channels: ['Supermarkets'],
+        marketShare: '—',
+      },
+    ],
   },
   {
-    code: 'ap-southeast-1',
-    name: 'Asia Pacific (Singapore)',
-    location: 'Singapore',
-    flag: '🇸🇬',
-    services: ['EC2', 'ECS', 'ALB', 'RDS', 'ElastiCache'],
-    primary: false,
-  },
-  {
-    code: 'eu-west-1',
-    name: 'Europe (Ireland)',
-    location: 'Dublin, Ireland',
-    flag: '🇮🇪',
-    services: ['EC2', 'S3', 'Lambda', 'CloudWatch'],
-    primary: false,
+    key: 'asia',
+    label: 'Asia',
+    emoji: '🌏',
+    tagline: 'South, South-East & East Asia',
+    highlights: [
+      { label: 'Countries', value: '6' },
+      { label: 'Distribution Centres', value: '22' },
+      { label: 'Retail Partners', value: '8,400+' },
+      { label: 'Annual Revenue', value: '$95M' },
+    ],
+    countries: [
+      {
+        name: 'India',
+        flag: '🇮🇳',
+        cities: ['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad'],
+        status: 'active',
+        channels: ['Supermarkets', 'E-commerce', 'Kirana Stores', 'Wholesale'],
+        marketShare: '24%',
+      },
+      {
+        name: 'China',
+        flag: '🇨🇳',
+        cities: ['Shanghai', 'Beijing', 'Shenzhen', 'Guangzhou'],
+        status: 'active',
+        channels: ['E-commerce', 'Supermarkets', 'Convenience'],
+        marketShare: '20%',
+      },
+      {
+        name: 'Japan',
+        flag: '🇯🇵',
+        cities: ['Tokyo', 'Osaka', 'Nagoya'],
+        status: 'active',
+        channels: ['Convenience', 'Supermarkets', 'E-commerce'],
+        marketShare: '14%',
+      },
+      {
+        name: 'Singapore',
+        flag: '🇸🇬',
+        cities: ['Singapore City'],
+        status: 'active',
+        channels: ['Supermarkets', 'E-commerce', 'Convenience'],
+        marketShare: '10%',
+      },
+      {
+        name: 'Indonesia',
+        flag: '🇮🇩',
+        cities: ['Jakarta', 'Surabaya', 'Bali'],
+        status: 'expanding',
+        channels: ['Supermarkets', 'E-commerce'],
+        marketShare: '7%',
+      },
+      {
+        name: 'Vietnam',
+        flag: '🇻🇳',
+        cities: ['Ho Chi Minh City', 'Hanoi'],
+        status: 'planned',
+        channels: ['Supermarkets'],
+        marketShare: '—',
+      },
+    ],
   },
 ]
 
-const stats = [
-  { label: 'AWS Regions', value: regions.length.toString() },
-  { label: 'Services Used', value: '20+' },
-  { label: 'Deployments', value: '50+' },
-  { label: 'Uptime SLA', value: '99.9%' },
-]
+const statusConfig = {
+  active:    { label: 'Active',    cls: 'status-active' },
+  expanding: { label: 'Expanding', cls: 'status-expanding' },
+  planned:   { label: 'Planned',   cls: 'status-planned' },
+}
 
 export default function Regions() {
+  const [activeRegion, setActiveRegion] = useState<RegionKey>('americas')
+  const region = regions.find((r) => r.key === activeRegion)!
+
   return (
     <div className="page-wrapper">
       <header className="page-header">
@@ -60,70 +220,72 @@ export default function Regions() {
           ← Back
         </Link>
         <h1>Region of Operation</h1>
-        <p className="page-subtitle">AWS regions &amp; global deployment footprint</p>
+        <p className="page-subtitle">Our global market presence across 3 major regions</p>
       </header>
 
       <div className="ticks"></div>
 
-      {/* Stats bar */}
-      <section className="stats-bar" aria-label="Key metrics">
-        {stats.map((s) => (
-          <div key={s.label} className="stat-item">
-            <span className="stat-value">{s.value}</span>
-            <span className="stat-label">{s.label}</span>
+      {/* Region tabs */}
+      <nav className="region-tabs" aria-label="Select region">
+        {regions.map((r) => (
+          <button
+            key={r.key}
+            className={`region-tab${activeRegion === r.key ? ' region-tab-active' : ''}`}
+            onClick={() => setActiveRegion(r.key)}
+            aria-pressed={activeRegion === r.key}
+          >
+            <span aria-hidden="true">{r.emoji}</span>
+            {r.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="ticks"></div>
+
+      {/* Region highlights */}
+      <section className="stats-bar" aria-label={`${region.label} key metrics`}>
+        {region.highlights.map((h) => (
+          <div key={h.label} className="stat-item">
+            <span className="stat-value">{h.value}</span>
+            <span className="stat-label">{h.label}</span>
           </div>
         ))}
       </section>
 
       <div className="ticks"></div>
 
-      {/* Region cards */}
-      <section className="regions-grid" aria-label="AWS regions">
-        {regions.map((r) => (
-          <article key={r.code} className={`region-card${r.primary ? ' region-primary' : ''}`}>
+      {/* Country cards */}
+      <section className="regions-grid" aria-label={`Countries in ${region.label}`}>
+        {region.countries.map((c) => (
+          <article key={c.name} className={`region-card${c.status === 'active' ? ' region-primary' : ''}`}>
             <div className="region-card-top">
-              <span className="region-flag" aria-hidden="true">{r.flag}</span>
-              {r.primary && (
-                <span className="primary-badge" aria-label="Primary region">
-                  Primary
-                </span>
-              )}
+              <span className="region-flag" aria-hidden="true">{c.flag}</span>
+              <span className={`country-status ${statusConfig[c.status].cls}`}>
+                {statusConfig[c.status].label}
+              </span>
             </div>
-            <h2>{r.name}</h2>
-            <p className="region-location">
-              <span aria-hidden="true">📍</span> {r.location}
-            </p>
-            <code className="region-code">{r.code}</code>
+            <h2>{c.name}</h2>
+
+            <div className="country-detail">
+              <span className="detail-label">Key Cities</span>
+              <p className="detail-value">{c.cities.join(', ')}</p>
+            </div>
+
+            <div className="country-detail">
+              <span className="detail-label">Market Share</span>
+              <p className="detail-value market-share">{c.marketShare}</p>
+            </div>
+
             <div className="region-services">
-              <p className="services-label">Active services</p>
-              <ul className="product-tags" aria-label={`Services in ${r.name}`}>
-                {r.services.map((svc) => (
-                  <li key={svc} className="tag">
-                    {svc}
-                  </li>
+              <p className="services-label">Distribution Channels</p>
+              <ul className="product-tags" aria-label={`Channels in ${c.name}`}>
+                {c.channels.map((ch) => (
+                  <li key={ch} className="tag">{ch}</li>
                 ))}
               </ul>
             </div>
           </article>
         ))}
-      </section>
-
-      <div className="ticks"></div>
-
-      {/* World map placeholder */}
-      <section className="map-section" aria-label="Deployment map">
-        <h2>Global Footprint</h2>
-        <p>Deployments span 4 AWS regions across Asia Pacific, Europe, and North America.</p>
-        <div className="map-visual" aria-hidden="true">
-          <div className="map-dot dot-mumbai" title="ap-south-1 · Mumbai"></div>
-          <div className="map-dot dot-virginia" title="us-east-1 · N. Virginia"></div>
-          <div className="map-dot dot-singapore" title="ap-southeast-1 · Singapore"></div>
-          <div className="map-dot dot-ireland" title="eu-west-1 · Ireland"></div>
-        </div>
-        <p className="map-legend">
-          <span className="legend-dot primary-dot" aria-hidden="true"></span> Primary region &nbsp;
-          <span className="legend-dot secondary-dot" aria-hidden="true"></span> Secondary region
-        </p>
       </section>
 
       <div className="ticks"></div>
