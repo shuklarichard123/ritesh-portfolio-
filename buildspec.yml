@@ -1,14 +1,39 @@
 ﻿version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-south-1
+    ECR_REPO_NAME: ritesh-portfolio
+    ECS_CLUSTER: portfolio-cluster
+    ECS_SERVICE: portfolio-service
+    CONTAINER_NAME: portfolio-app
+
 phases:
-  install:
-    runtime-versions:
-      nodejs: 20
+  pre_build:
     commands:
-      - npm ci
+      # Get AWS account ID dynamically
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - ECR_REGISTRY=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - IMAGE_URI=$ECR_REGISTRY/$ECR_REPO_NAME
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+
   build:
     commands:
-      - npm run build
+      - echo "Building Docker image..."
+      - docker build -t $IMAGE_URI:$IMAGE_TAG .
+      - docker tag $IMAGE_URI:$IMAGE_TAG $IMAGE_URI:latest
+
+  post_build:
+    commands:
+      - echo "Pushing image to ECR..."
+      - docker push $IMAGE_URI:$IMAGE_TAG
+      - docker push $IMAGE_URI:latest
+      # Write imagedefinitions.json for ECS deploy action in CodePipeline
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $IMAGE_URI:$IMAGE_TAG > imagedefinitions.json
+      - echo "Done. Image pushed:" $IMAGE_URI:$IMAGE_TAG
+
 artifacts:
   files:
-    - '**/*'
-  base-directory: dist
+    - imagedefinitions.json
