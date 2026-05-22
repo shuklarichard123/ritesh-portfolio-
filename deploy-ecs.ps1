@@ -13,7 +13,7 @@
 # ============================================================
 
 # ── Config — edit these to match your AWS setup ─────────────
-$REGION       = "ap-south-1"
+$REGION       = "eu-west-1"
 $ECR_REPO     = "ritesh-portfolio"
 $CLUSTER      = "portfolio-cluster"
 $SERVICE      = "portfolio-service"

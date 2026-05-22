@@ -11,7 +11,7 @@ version: 0.2
 
 env:
   variables:
-    AWS_DEFAULT_REGION: ap-south-1
+    AWS_DEFAULT_REGION: eu-west-1
     ECR_REPO_NAME: ritesh-portfolio
     ECS_CLUSTER: portfolio-cluster
     ECS_SERVICE: portfolio-service
