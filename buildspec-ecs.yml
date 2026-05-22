@@ -1,0 +1,51 @@
+version: 0.2
+
+# This buildspec is used by a SEPARATE CodePipeline for ECS deployment.
+# The original buildspec.yml continues to serve the S3/CloudFront pipeline.
+#
+# CodeBuild environment requirements:
+#   - Environment type : Linux
+#   - Compute          : Standard (any size)
+#   - Privileged mode  : ENABLED  <-- required for Docker
+#   - Runtime          : Standard (no managed runtime needed)
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: ap-south-1
+    ECR_REPO_NAME: ritesh-portfolio
+    ECS_CLUSTER: portfolio-cluster
+    ECS_SERVICE: portfolio-service
+    CONTAINER_NAME: portfolio-app
+
+phases:
+  pre_build:
+    commands:
+      - echo "==> Resolving account and image details..."
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - ECR_REGISTRY=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - IMAGE_URI=$ECR_REGISTRY/$ECR_REPO_NAME
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_SOURCE_VERSION
+      - echo "Image will be pushed to $IMAGE_URI:$IMAGE_TAG"
+      - echo "==> Logging Docker into ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+      - echo "==> Ensuring ECR repository exists..."
+      - aws ecr describe-repositories --repository-names $ECR_REPO_NAME --region $AWS_DEFAULT_REGION || aws ecr create-repository --repository-name $ECR_REPO_NAME --region $AWS_DEFAULT_REGION
+
+  build:
+    commands:
+      - echo "==> Building Docker image..."
+      - docker build -t $IMAGE_URI:$IMAGE_TAG -t $IMAGE_URI:latest .
+
+  post_build:
+    commands:
+      - echo "==> Pushing image to ECR..."
+      - docker push $IMAGE_URI:$IMAGE_TAG
+      - docker push $IMAGE_URI:latest
+      - echo "==> Writing imagedefinitions.json for ECS deploy stage..."
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $IMAGE_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
+      - echo "==> Done."
+
+artifacts:
+  files:
+    - imagedefinitions.json
