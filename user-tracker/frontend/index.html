@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Request Tracker</title>
+  <title>External User IP Whitelisting Application Request Form</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -12,8 +12,8 @@
     <!-- Header -->
     <header class="header">
       <div class="header-inner">
-        <h1>🗂 User Request Tracker</h1>
-        <p>Submit and view user requests stored in DynamoDB via Lambda</p>
+        <h1>🔐 External User IP Whitelisting Application Request Form</h1>
+        <p>Submit and track IP whitelisting requests for external user access</p>
       </div>
     </header>
 
@@ -21,35 +21,114 @@
 
       <!-- Tab nav -->
       <nav class="tabs" role="tablist">
-        <button class="tab tab-active" role="tab" aria-selected="true"  data-tab="submit">Submit Request</button>
-        <button class="tab"            role="tab" aria-selected="false" data-tab="view">View Records</button>
+        <button class="tab tab-active" role="tab" aria-selected="true"  data-tab="submit">New Request</button>
+        <button class="tab"            role="tab" aria-selected="false" data-tab="view">View Requests</button>
         <button class="tab"            role="tab" aria-selected="false" data-tab="lookup">Lookup by ID</button>
       </nav>
 
       <!-- ── Tab: Submit ── -->
       <section id="tab-submit" class="tab-panel" role="tabpanel">
         <form id="submit-form" class="card" novalidate>
-          <h2>New Request</h2>
+          <h2>New IP Whitelisting Request</h2>
+          <p class="form-desc">Fill in the details below to request external IP whitelisting access. All fields marked <span aria-hidden="true" style="color:var(--red)">*</span> are required.</p>
 
-          <div class="field">
-            <label for="username">Username <span aria-hidden="true">*</span></label>
-            <input type="text" id="username" name="username" placeholder="e.g. ritesh.shukla" required autocomplete="username" />
-          </div>
+          <!-- Requester details -->
+          <fieldset class="fieldset">
+            <legend>Requester Details</legend>
 
-          <div class="field">
-            <label for="requested_data">Requested Data <span aria-hidden="true">*</span></label>
-            <input type="text" id="requested_data" name="requested_data" placeholder="e.g. sales report for Q2 2026" required />
-          </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="username">Full Name <span aria-hidden="true">*</span></label>
+                <input type="text" id="username" name="username" placeholder="e.g. Ritesh Shukla" required autocomplete="name" />
+              </div>
+              <div class="field">
+                <label for="requester_email">Email Address <span aria-hidden="true">*</span></label>
+                <input type="email" id="requester_email" name="requester_email" placeholder="e.g. ritesh@example.com" required autocomplete="email" />
+              </div>
+            </div>
 
-          <div class="field">
-            <label for="input_parameters">Input Parameters <span class="label-hint">(JSON)</span></label>
-            <textarea id="input_parameters" name="input_parameters" rows="4"
-              placeholder='{"region": "eu-west-1", "date_range": "2026-01-01/2026-06-30"}'></textarea>
-            <span class="field-hint">Optional. Must be valid JSON if provided.</span>
-          </div>
+            <div class="field">
+              <label for="requested_data">Organisation / Team <span aria-hidden="true">*</span></label>
+              <input type="text" id="requested_data" name="requested_data" placeholder="e.g. IBM Cloud Infrastructure Team" required />
+            </div>
+          </fieldset>
+
+          <!-- IP & Access details -->
+          <fieldset class="fieldset">
+            <legend>IP &amp; Access Details</legend>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="ip_address">IP Address / CIDR Range <span aria-hidden="true">*</span></label>
+                <input type="text" id="ip_address" name="ip_address"
+                  placeholder="e.g. 203.0.113.45 or 203.0.113.0/24" required
+                  pattern="^(\d{1,3}\.){3}\d{1,3}(\/\d{1,2})?$" />
+                <span class="field-hint">IPv4 address or CIDR block (e.g. 10.0.0.0/16)</span>
+              </div>
+              <div class="field">
+                <label for="port">Port / Port Range <span aria-hidden="true">*</span></label>
+                <input type="text" id="port" name="port" placeholder="e.g. 443 or 8080-8090" required />
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="environment">Target Environment <span aria-hidden="true">*</span></label>
+                <select id="environment" name="environment" required>
+                  <option value="" disabled selected>Select environment…</option>
+                  <option value="Production">Production</option>
+                  <option value="Staging">Staging</option>
+                  <option value="Development">Development</option>
+                  <option value="UAT">UAT</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="access_duration">Access Duration <span aria-hidden="true">*</span></label>
+                <select id="access_duration" name="access_duration" required>
+                  <option value="" disabled selected>Select duration…</option>
+                  <option value="7 days">7 Days</option>
+                  <option value="30 days">30 Days</option>
+                  <option value="90 days">90 Days</option>
+                  <option value="Permanent">Permanent</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="application_name">Application / Service Name <span aria-hidden="true">*</span></label>
+              <input type="text" id="application_name" name="application_name" placeholder="e.g. Portfolio API, Customer Portal" required />
+            </div>
+
+            <div class="field">
+              <label for="protocol">Protocol</label>
+              <div class="checkbox-group" role="group" aria-label="Protocol">
+                <label class="checkbox-label"><input type="checkbox" name="protocol" value="HTTPS" checked /> HTTPS</label>
+                <label class="checkbox-label"><input type="checkbox" name="protocol" value="HTTP" /> HTTP</label>
+                <label class="checkbox-label"><input type="checkbox" name="protocol" value="SSH" /> SSH</label>
+                <label class="checkbox-label"><input type="checkbox" name="protocol" value="TCP" /> TCP</label>
+                <label class="checkbox-label"><input type="checkbox" name="protocol" value="UDP" /> UDP</label>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Justification -->
+          <fieldset class="fieldset">
+            <legend>Justification &amp; Approval</legend>
+
+            <div class="field">
+              <label for="business_justification">Business Justification <span aria-hidden="true">*</span></label>
+              <textarea id="business_justification" name="business_justification" rows="3"
+                placeholder="Describe why this IP needs whitelisting access and what it will be used for…" required></textarea>
+            </div>
+
+            <div class="field">
+              <label for="approver_name">Approver Name <span aria-hidden="true">*</span></label>
+              <input type="text" id="approver_name" name="approver_name" placeholder="e.g. John Smith (Manager)" required />
+            </div>
+          </fieldset>
 
           <button type="submit" class="btn btn-primary" id="submit-btn">
-            <span class="btn-text">Submit Request</span>
+            <span class="btn-text">🚀 Submit Request</span>
             <span class="btn-loader" hidden>Submitting…</span>
           </button>
 
@@ -60,10 +139,10 @@
       <!-- ── Tab: View Records ── -->
       <section id="tab-view" class="tab-panel" hidden role="tabpanel">
         <div class="card">
-          <h2>All Records</h2>
+          <h2>All Whitelisting Requests</h2>
           <div class="filter-row">
-            <input type="text" id="filter-username" placeholder="Filter by username…" />
-            <button class="btn btn-secondary" id="load-btn">Load Records</button>
+            <input type="text" id="filter-username" placeholder="Filter by requester name…" />
+            <button class="btn btn-secondary" id="load-btn">Load Requests</button>
           </div>
           <div id="records-result" class="result" hidden></div>
           <div id="records-table-wrap" hidden>
@@ -71,10 +150,13 @@
               <thead>
                 <tr>
                   <th>Request ID</th>
-                  <th>Username</th>
-                  <th>Requested Data</th>
-                  <th>Input Parameters</th>
-                  <th>Created At</th>
+                  <th>Full Name</th>
+                  <th>Organisation</th>
+                  <th>IP Address</th>
+                  <th>Environment</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th>Submitted</th>
                 </tr>
               </thead>
               <tbody id="records-tbody"></tbody>
@@ -99,7 +181,6 @@
     </main>
   </div>
 
-  <!-- API URL is injected by deploy-infra.ps1 -->
   <script src="api-config.js"></script>
   <script src="app.js"></script>
 </body>
