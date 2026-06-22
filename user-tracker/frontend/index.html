@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Request Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <h1>🗂 User Request Tracker</h1>
+        <p>Submit and view user requests stored in DynamoDB via Lambda</p>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <!-- Tab nav -->
+      <nav class="tabs" role="tablist">
+        <button class="tab tab-active" role="tab" aria-selected="true"  data-tab="submit">Submit Request</button>
+        <button class="tab"            role="tab" aria-selected="false" data-tab="view">View Records</button>
+        <button class="tab"            role="tab" aria-selected="false" data-tab="lookup">Lookup by ID</button>
+      </nav>
+
+      <!-- ── Tab: Submit ── -->
+      <section id="tab-submit" class="tab-panel" role="tabpanel">
+        <form id="submit-form" class="card" novalidate>
+          <h2>New Request</h2>
+
+          <div class="field">
+            <label for="username">Username <span aria-hidden="true">*</span></label>
+            <input type="text" id="username" name="username" placeholder="e.g. ritesh.shukla" required autocomplete="username" />
+          </div>
+
+          <div class="field">
+            <label for="requested_data">Requested Data <span aria-hidden="true">*</span></label>
+            <input type="text" id="requested_data" name="requested_data" placeholder="e.g. sales report for Q2 2026" required />
+          </div>
+
+          <div class="field">
+            <label for="input_parameters">Input Parameters <span class="label-hint">(JSON)</span></label>
+            <textarea id="input_parameters" name="input_parameters" rows="4"
+              placeholder='{"region": "eu-west-1", "date_range": "2026-01-01/2026-06-30"}'></textarea>
+            <span class="field-hint">Optional. Must be valid JSON if provided.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="submit-btn">
+            <span class="btn-text">Submit Request</span>
+            <span class="btn-loader" hidden>Submitting…</span>
+          </button>
+
+          <div id="submit-result" class="result" hidden></div>
+        </form>
+      </section>
+
+      <!-- ── Tab: View Records ── -->
+      <section id="tab-view" class="tab-panel" hidden role="tabpanel">
+        <div class="card">
+          <h2>All Records</h2>
+          <div class="filter-row">
+            <input type="text" id="filter-username" placeholder="Filter by username…" />
+            <button class="btn btn-secondary" id="load-btn">Load Records</button>
+          </div>
+          <div id="records-result" class="result" hidden></div>
+          <div id="records-table-wrap" hidden>
+            <table class="records-table" id="records-table">
+              <thead>
+                <tr>
+                  <th>Request ID</th>
+                  <th>Username</th>
+                  <th>Requested Data</th>
+                  <th>Input Parameters</th>
+                  <th>Created At</th>
+                </tr>
+              </thead>
+              <tbody id="records-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab: Lookup by ID ── -->
+      <section id="tab-lookup" class="tab-panel" hidden role="tabpanel">
+        <div class="card">
+          <h2>Lookup by Request ID</h2>
+          <div class="filter-row">
+            <input type="text" id="lookup-id" placeholder="Paste a Request ID…" />
+            <button class="btn btn-secondary" id="lookup-btn">Lookup</button>
+          </div>
+          <div id="lookup-result" class="result" hidden></div>
+          <div id="lookup-detail" class="detail-card" hidden></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- API URL is injected by deploy-infra.ps1 -->
+  <script src="api-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
