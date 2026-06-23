@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>IP Whitelisting App — Architecture Overview</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  :root {
+    --navy:   #0f1b35;
+    --blue:   #1a56db;
+    --sky:    #3b82f6;
+    --cyan:   #06b6d4;
+    --green:  #10b981;
+    --orange: #f59e0b;
+    --red:    #ef4444;
+    --purple: #8b5cf6;
+    --light:  #f1f5f9;
+    --white:  #ffffff;
+    --grey:   #64748b;
+    --border: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+
+  /* ── Print: one slide per page ── */
+  @media print {
+    .slide { page-break-after: always; box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; }
+    body { background: white; }
+    .print-hint { display: none; }
+  }
+</style>
+<style>
+  /* ── Slides ── */
+  .deck { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+  .slide {
+    width: 100%; aspect-ratio: 16/9;
+    background: white; border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.10);
+    margin-bottom: 40px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column;
+  }
+  .print-hint {
+    text-align: center; padding: 12px; font-size: 13px; color: var(--grey);
+    background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+    margin-bottom: 28px;
+  }
+
+  /* ── Slide 1: Title ── */
+  .s1 { background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 60%, #1d4ed8 100%); color: white; justify-content: center; align-items: center; text-align: center; padding: 60px; }
+  .s1 .tag { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); padding: 6px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 28px; display: inline-block; }
+  .s1 h1 { font-size: clamp(24px, 3.5vw, 42px); font-weight: 800; line-height: 1.2; margin-bottom: 16px; }
+  .s1 .sub { font-size: clamp(13px, 1.5vw, 18px); opacity: .75; margin-bottom: 40px; }
+  .s1 .meta { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; }
+  .s1 .meta-item { font-size: 13px; opacity: .7; }
+  .s1 .meta-item strong { display: block; font-size: 15px; opacity: 1; margin-bottom: 2px; }
+
+  /* ── Slide 2: Executive Summary ── */
+  .s2 { padding: 48px 56px; }
+  .slide-header { margin-bottom: 32px; }
+  .slide-num { font-size: 12px; font-weight: 700; color: var(--sky); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+  .slide-title { font-size: clamp(20px, 2.5vw, 30px); font-weight: 800; color: var(--navy); }
+  .slide-title span { color: var(--blue); }
+  .summary-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .summary-card { background: var(--light); border-radius: 12px; padding: 20px; border-left: 4px solid var(--blue); }
+  .summary-card .icon { font-size: 28px; margin-bottom: 10px; }
+  .summary-card h3 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .summary-card p { font-size: 12px; color: var(--grey); line-height: 1.6; }
+</style>
+<style>
+  /* ── Slide 3: Architecture Flow ── */
+  .s3 { padding: 36px 48px; }
+  .flow { display: flex; align-items: center; justify-content: center; gap: 0; flex-wrap: nowrap; margin-top: 24px; overflow-x: auto; }
+  .flow-box { display: flex; flex-direction: column; align-items: center; min-width: 110px; }
+  .flow-icon { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.12); }
+  .flow-label { font-size: 11px; font-weight: 700; text-align: center; color: var(--navy); }
+  .flow-sub { font-size: 10px; color: var(--grey); text-align: center; margin-top: 2px; }
+  .flow-arrow { font-size: 22px; color: var(--border); margin: 0 6px; padding-bottom: 28px; flex-shrink: 0; }
+  .bg-blue   { background: linear-gradient(135deg,#dbeafe,#bfdbfe); }
+  .bg-cyan   { background: linear-gradient(135deg,#cffafe,#a5f3fc); }
+  .bg-green  { background: linear-gradient(135deg,#d1fae5,#a7f3d0); }
+  .bg-purple { background: linear-gradient(135deg,#ede9fe,#ddd6fe); }
+  .bg-orange { background: linear-gradient(135deg,#fef3c7,#fde68a); }
+  .bg-navy   { background: linear-gradient(135deg,#dbeafe,#93c5fd); }
+
+  /* ── Slide 4: Component Detail ── */
+  .s4 { padding: 36px 48px; }
+  .comp-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-top: 8px; }
+  .comp-card { border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .comp-card .c-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .comp-card .c-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .comp-card .c-name { font-size: 13px; font-weight: 700; color: var(--navy); }
+  .comp-card .c-type { font-size: 10px; color: var(--grey); }
+  .comp-card ul { list-style: none; }
+  .comp-card ul li { font-size: 11px; color: var(--grey); padding: 3px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
+  .comp-card ul li:last-child { border-bottom: none; }
+  .comp-card ul li::before { content: "▸ "; color: var(--sky); font-size: 10px; }
+
+  /* ── Slide 5: Data Flow ── */
+  .s5 { padding: 36px 56px; }
+  .steps { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+  .step { display: flex; align-items: flex-start; gap: 16px; }
+  .step-num { width: 32px; height: 32px; border-radius: 50%; background: var(--blue); color: white; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-body h4 { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+  .step-body p  { font-size: 12px; color: var(--grey); line-height: 1.5; }
+  .step-connector { width: 2px; height: 12px; background: var(--border); margin-left: 15px; }
+</style>
+<style>
+  /* ── Slide 6: Cost & Security ── */
+  .s6 { padding: 36px 48px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+  .panel { border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .panel h3 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .cost-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .cost-row:last-child { border-bottom: none; font-weight: 700; color: var(--navy); }
+  .cost-row .svc { color: var(--grey); }
+  .cost-row .amt { font-weight: 600; color: var(--green); }
+  .cost-row.total .amt { color: var(--blue); font-size: 15px; }
+  .sec-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .sec-item:last-child { border-bottom: none; }
+  .sec-item .s-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .sec-item .s-text h4 { font-size: 12px; font-weight: 700; color: var(--navy); }
+  .sec-item .s-text p  { font-size: 11px; color: var(--grey); line-height: 1.4; }
+
+  /* ── Slide 7: Deployment Pipeline ── */
+  .s7 { padding: 36px 48px; }
+  .pipeline { display: flex; align-items: stretch; gap: 0; margin-top: 24px; }
+  .pipe-stage { flex: 1; border: 1px solid var(--border); border-right: none; padding: 16px 14px; position: relative; }
+  .pipe-stage:last-child { border-right: 1px solid var(--border); border-radius: 0 12px 12px 0; }
+  .pipe-stage:first-child { border-radius: 12px 0 0 12px; }
+  .pipe-stage .p-icon { font-size: 24px; margin-bottom: 8px; }
+  .pipe-stage .p-name { font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .pipe-stage .p-svc  { font-size: 10px; color: var(--sky); font-weight: 600; margin-bottom: 8px; }
+  .pipe-stage ul { list-style: none; }
+  .pipe-stage ul li { font-size: 10px; color: var(--grey); padding: 2px 0; line-height: 1.4; }
+  .pipe-stage ul li::before { content: "· "; }
+  .pipe-arrow { display: flex; align-items: center; color: var(--border); font-size: 20px; padding-bottom: 30px; flex-shrink: 0; }
+
+  /* ── Slide 8: Summary ── */
+  .s8 { background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%); color: white; padding: 56px; justify-content: center; }
+  .s8 .slide-title { color: white; }
+  .s8 .slide-num { color: #93c5fd; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 32px; }
+  .kpi-card { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 20px; text-align: center; }
+  .kpi-card .kpi-val { font-size: clamp(22px,2.5vw,32px); font-weight: 800; color: #93c5fd; margin-bottom: 4px; }
+  .kpi-card .kpi-lab { font-size: 11px; opacity: .7; text-transform: uppercase; letter-spacing: .06em; }
+  .s8 .closing { margin-top: 32px; font-size: 14px; opacity: .7; text-align: center; }
+</style>
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <div class="print-hint">
+    💡 <strong>To export as PDF:</strong> Press <kbd>Ctrl+P</kbd> → Set destination to "Save as PDF" → Layout: Landscape → Save
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 1 — Title
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s1">
+    <div class="tag">AWS Cloud Architecture</div>
+    <h1>External User IP Whitelisting<br>Application — Architecture Overview</h1>
+    <p class="sub">Serverless request management platform on AWS · S3 · CloudFront · Lambda · DynamoDB</p>
+    <div class="meta">
+      <div class="meta-item"><strong>Author</strong>Ritesh Shukla</div>
+      <div class="meta-item"><strong>Region</strong>eu-west-1 (Ireland)</div>
+      <div class="meta-item"><strong>Version</strong>1.0</div>
+      <div class="meta-item"><strong>Date</strong>June 2026</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 2 — Executive Summary
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s2">
+    <div class="slide-header">
+      <div class="slide-num">Slide 02</div>
+      <div class="slide-title">Executive <span>Summary</span></div>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card" style="border-color:var(--blue)">
+        <div class="icon">🎯</div>
+        <h3>Problem Statement</h3>
+        <p>External users need a formal, auditable process to request IP whitelisting access to internal applications. Manual email-based processes lack traceability and approval tracking.</p>
+      </div>
+      <div class="summary-card" style="border-color:var(--green)">
+        <div class="icon">✅</div>
+        <h3>Solution</h3>
+        <p>A fully serverless web application hosted on AWS. Users submit structured requests via a web form. All requests are stored in DynamoDB with a unique Request ID for tracking.</p>
+      </div>
+      <div class="summary-card" style="border-color:var(--purple)">
+        <div class="icon">💡</div>
+        <h3>Key Benefits</h3>
+        <p>Zero server management · Near-zero cost (~$1/month) · Auto-scaling · Full audit trail · Accessible globally via CloudFront CDN · CI/CD automated deployment.</p>
+      </div>
+    </div>
+    <div style="margin-top:24px; padding:16px 20px; background:var(--light); border-radius:10px; font-size:12px; color:var(--grey); line-height:1.7;">
+      <strong style="color:var(--navy)">In scope:</strong> Request submission, storage and retrieval &nbsp;·&nbsp;
+      <strong style="color:var(--navy)">Out of scope:</strong> Automated firewall rule provisioning (handled by network team post-approval)
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 3 — Architecture Flow Diagram
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s3">
+    <div class="slide-header">
+      <div class="slide-num">Slide 03</div>
+      <div class="slide-title">Architecture <span>Flow</span></div>
+    </div>
+    <div class="flow">
+      <div class="flow-box">
+        <div class="flow-icon bg-blue">🌐</div>
+        <div class="flow-label">External User</div>
+        <div class="flow-sub">Browser</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon bg-orange">☁️</div>
+        <div class="flow-label">CloudFront</div>
+        <div class="flow-sub">CDN / HTTPS</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon bg-cyan">🪣</div>
+        <div class="flow-label">S3 Bucket</div>
+        <div class="flow-sub">Static Hosting</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon bg-purple">🔗</div>
+        <div class="flow-label">API Gateway</div>
+        <div class="flow-sub">REST API</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon bg-green">λ</div>
+        <div class="flow-label">Lambda</div>
+        <div class="flow-sub">Python 3.12</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">
+        <div class="flow-icon bg-navy">🗄️</div>
+        <div class="flow-label">DynamoDB</div>
+        <div class="flow-sub">NoSQL Store</div>
+      </div>
+    </div>
+    <div style="margin-top:28px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:14px; font-size:11px; color:#0369a1;">
+        <strong>Frontend Layer</strong><br>CloudFront serves HTML/CSS/JS from S3 over HTTPS with global edge caching. SPA routing handled client-side.
+      </div>
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px; font-size:11px; color:#166534;">
+        <strong>API Layer</strong><br>API Gateway exposes /records endpoints. Lambda proxy integration routes POST, GET requests. CORS enabled for browser calls.
+      </div>
+      <div style="background:#faf5ff; border:1px solid #ddd6fe; border-radius:10px; padding:14px; font-size:11px; color:#6b21a8;">
+        <strong>Data Layer</strong><br>DynamoDB stores each request with a UUID. GSI on username enables filtered queries. Pay-per-request billing — no idle cost.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 4 — Component Details
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s4">
+    <div class="slide-header">
+      <div class="slide-num">Slide 04</div>
+      <div class="slide-title">Component <span>Details</span></div>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-card">
+        <div class="c-head">
+          <div class="c-icon bg-orange">☁️</div>
+          <div><div class="c-name">Amazon CloudFront</div><div class="c-type">CDN / Edge</div></div>
+        </div>
+        <ul>
+          <li>Distribution: E36T8J14OE3ZLB</li>
+          <li>Origin: ritesh-portfolio-prod.s3</li>
+          <li>Custom error → /index.html (SPA)</li>
+          <li>HTTPS enforced globally</li>
+          <li>Edge caching for static assets</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="c-head">
+          <div class="c-icon bg-cyan">🪣</div>
+          <div><div class="c-name">Amazon S3</div><div class="c-type">Static Hosting</div></div>
+        </div>
+        <ul>
+          <li>Bucket: ritesh-portfolio-prod</li>
+          <li>Region: eu-west-1</li>
+          <li>Path: /tracker/</li>
+          <li>Files: index.html, style.css, app.js</li>
+          <li>Private — accessed via CloudFront OAC</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="c-head">
+          <div class="c-icon bg-purple">🔗</div>
+          <div><div class="c-name">API Gateway</div><div class="c-type">REST API</div></div>
+        </div>
+        <ul>
+          <li>API ID: 517p6ffpyi</li>
+          <li>Stage: /prod</li>
+          <li>POST /records — create request</li>
+          <li>GET /records — list all / filter</li>
+          <li>GET /records/{id} — fetch one</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="c-head">
+          <div class="c-icon bg-green">λ</div>
+          <div><div class="c-name">AWS Lambda</div><div class="c-type">Compute</div></div>
+        </div>
+        <ul>
+          <li>Function: user-tracker-api</li>
+          <li>Runtime: Python 3.12</li>
+          <li>Memory: 128 MB · Timeout: 15s</li>
+          <li>IAM role: user-tracker-lambda-role</li>
+          <li>Logs: CloudWatch /aws/lambda/</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="c-head">
+          <div class="c-icon bg-navy">🗄️</div>
+          <div><div class="c-name">Amazon DynamoDB</div><div class="c-type">NoSQL Database</div></div>
+        </div>
+        <ul>
+          <li>Table: user-tracker</li>
+          <li>Partition key: request_id (UUID)</li>
+          <li>GSI: username-index</li>
+          <li>Billing: PAY_PER_REQUEST</li>
+          <li>Fields: username, requested_data, input_parameters, created_at</li>
+        </ul>
+      </div>
+      <div class="comp-card">
+        <div class="c-head">
+          <div class="c-icon bg-blue">🔐</div>
+          <div><div class="c-name">IAM &amp; Security</div><div class="c-type">Access Control</div></div>
+        </div>
+        <ul>
+          <li>Lambda role: least-privilege DynamoDB</li>
+          <li>Actions: PutItem, GetItem, Scan, Query</li>
+          <li>CloudWatch Logs write access</li>
+          <li>API Gateway: no auth (public form)</li>
+          <li>CORS headers on all responses</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 5 — Step-by-Step Data Flow
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s5">
+    <div class="slide-header">
+      <div class="slide-num">Slide 05</div>
+      <div class="slide-title">Request <span>Data Flow</span></div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:8px;">
+      <div>
+        <div style="font-size:12px; font-weight:700; color:var(--blue); text-transform:uppercase; letter-spacing:.07em; margin-bottom:14px;">📤 Submit Flow</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-body"><h4>User opens the form</h4><p>Browser loads index.html from CloudFront edge. Assets served from S3 via CDN.</p></div></div>
+          <div class="step-connector"></div>
+          <div class="step"><div class="step-num">2</div><div class="step-body"><h4>User fills &amp; submits</h4><p>Enters name, email, IP/CIDR, port, environment, protocol, justification and approver.</p></div></div>
+          <div class="step-connector"></div>
+          <div class="step"><div class="step-num">3</div><div class="step-body"><h4>Browser calls API Gateway</h4><p>JavaScript sends POST /records with JSON payload to API Gateway HTTPS endpoint.</p></div></div>
+          <div class="step-connector"></div>
+          <div class="step"><div class="step-num">4</div><div class="step-body"><h4>Lambda processes request</h4><p>Python handler validates input, generates UUID request_id, records timestamp.</p></div></div>
+          <div class="step-connector"></div>
+          <div class="step"><div class="step-num">5</div><div class="step-body"><h4>Stored in DynamoDB</h4><p>Record written to user-tracker table. Request ID returned to browser and shown to user.</p></div></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:.07em; margin-bottom:14px;">📥 Retrieval Flow</div>
+        <div class="steps">
+          <div class="step"><div class="step-num" style="background:var(--green)">1</div><div class="step-body"><h4>Admin opens View Requests tab</h4><p>Clicks "Load Requests" — optionally filters by requester name.</p></div></div>
+          <div class="step-connector"></div>
+          <div class="step"><div class="step-num" style="background:var(--green)">2</div><div class="step-body"><h4>GET /records called</h4><p>With username param: DynamoDB Query on GSI. Without: full Scan. Sorted newest first.</p></div></div>
+          <div class="step-connector"></div>
+          <div class="step"><div class="step-num" style="background:var(--green)">3</div><div class="step-body"><h4>Table rendered</h4><p>Shows Request ID, Name, Organisation, IP, Environment, Duration, Status, Date.</p></div></div>
+          <div class="step-connector"></div>
+          <div class="step"><div class="step-num" style="background:var(--green)">4</div><div class="step-body"><h4>Lookup by ID</h4><p>GET /records/{request_id} fetches the full record with all fields including justification and approver.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 6 — Cost & Security
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s6">
+    <div class="slide-header">
+      <div class="slide-num">Slide 06</div>
+      <div class="slide-title">Cost &amp; <span>Security</span></div>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <h3>💰 Monthly Cost Estimate</h3>
+        <div class="cost-row"><span class="svc">Amazon S3 (storage + requests)</span><span class="amt">~$0.01</span></div>
+        <div class="cost-row"><span class="svc">CloudFront (free tier 1TB/month)</span><span class="amt">$0.00</span></div>
+        <div class="cost-row"><span class="svc">API Gateway (free tier 1M calls)</span><span class="amt">$0.00</span></div>
+        <div class="cost-row"><span class="svc">AWS Lambda (free tier 1M req)</span><span class="amt">$0.00</span></div>
+        <div class="cost-row"><span class="svc">DynamoDB (free tier 25 WCU/RCU)</span><span class="amt">$0.00</span></div>
+        <div class="cost-row"><span class="svc">CloudWatch Logs</span><span class="amt">~$0.05</span></div>
+        <div class="cost-row total"><span class="svc"><strong>Total (low traffic)</strong></span><span class="amt">~$0.06/month</span></div>
+        <div style="margin-top:12px; font-size:11px; color:var(--grey); line-height:1.6;">
+          ℹ️ Costs scale linearly with usage. At 100K requests/month still under $5. No idle compute cost — Lambda only charges per invocation.
+        </div>
+      </div>
+      <div class="panel">
+        <h3>🔒 Security Controls</h3>
+        <div class="sec-item"><div class="s-icon">🔐</div><div class="s-text"><h4>HTTPS Everywhere</h4><p>CloudFront enforces HTTPS. All browser-to-API traffic encrypted in transit.</p></div></div>
+        <div class="sec-item"><div class="s-icon">🛡️</div><div class="s-text"><h4>IAM Least Privilege</h4><p>Lambda role limited to PutItem, GetItem, Scan, Query on user-tracker table only.</p></div></div>
+        <div class="sec-item"><div class="s-icon">🪣</div><div class="s-text"><h4>Private S3 Bucket</h4><p>Bucket is not public. Content served exclusively through CloudFront OAC.</p></div></div>
+        <div class="sec-item"><div class="s-icon">📋</div><div class="s-text"><h4>Audit Trail</h4><p>Every request stored with timestamp, requester details and approver in DynamoDB.</p></div></div>
+        <div class="sec-item"><div class="s-icon">📊</div><div class="s-text"><h4>CloudWatch Logging</h4><p>All Lambda invocations logged to /ecs/portfolio for monitoring and debugging.</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 7 — CI/CD Pipeline
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s7">
+    <div class="slide-header">
+      <div class="slide-num">Slide 07</div>
+      <div class="slide-title">CI/CD <span>Deployment Pipeline</span></div>
+    </div>
+    <div class="pipeline">
+      <div class="pipe-stage">
+        <div class="p-icon">📝</div>
+        <div class="p-name">Source</div>
+        <div class="p-svc">GitHub</div>
+        <ul><li>Push to main branch</li><li>CodeStar connection</li><li>Triggers pipeline</li></ul>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="p-icon">🔨</div>
+        <div class="p-name">Build</div>
+        <div class="p-svc">CodeBuild</div>
+        <ul><li>npm ci</li><li>tsc -b + vite build</li><li>Output: /dist</li></ul>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="p-icon">🚀</div>
+        <div class="p-name">Deploy Frontend</div>
+        <div class="p-svc">S3 + CloudFront</div>
+        <ul><li>Sync dist/ to S3</li><li>Invalidate CF cache</li><li>Live in ~2 min</li></ul>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="p-icon">λ</div>
+        <div class="p-name">Deploy Lambda</div>
+        <div class="p-svc">Manual / Script</div>
+        <ul><li>Zip handler.py</li><li>aws lambda update</li><li>Instant update</li></ul>
+      </div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-stage">
+        <div class="p-icon">✅</div>
+        <div class="p-name">Live</div>
+        <div class="p-svc">CloudFront URL</div>
+        <ul><li>d3hdlkebrri10x</li><li>.cloudfront.net</li><li>/tracker/</li></ul>
+      </div>
+    </div>
+    <div style="margin-top:20px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+      <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:10px; padding:14px; font-size:11px; color:#0369a1;">
+        <strong>S3 Pipeline (Active)</strong><br>buildspec.yml → npm ci → vite build → dist/ artifacts deployed to ritesh-portfolio-prod bucket.
+      </div>
+      <div style="background:#faf5ff; border:1px solid #ddd6fe; border-radius:10px; padding:14px; font-size:11px; color:#6b21a8;">
+        <strong>ECS Pipeline (Standby)</strong><br>buildspec-ecs.yml → Docker build → ECR push → ECS Fargate rolling deploy. Resume anytime.
+      </div>
+      <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px; font-size:11px; color:#166534;">
+        <strong>Zero Downtime</strong><br>Rolling deployments on ECS. CloudFront cache invalidation on S3 deploy ensures users always get latest build.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════
+       SLIDE 8 — Summary / Close
+  ═══════════════════════════════════════════════════════════ -->
+  <div class="slide s8">
+    <div class="slide-header">
+      <div class="slide-num">Slide 08</div>
+      <div class="slide-title">Solution <span>Summary</span></div>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-val">~$0</div><div class="kpi-lab">Monthly Cost</div></div>
+      <div class="kpi-card"><div class="kpi-val">5</div><div class="kpi-lab">AWS Services</div></div>
+      <div class="kpi-card"><div class="kpi-val">0</div><div class="kpi-lab">Servers to Manage</div></div>
+      <div class="kpi-card"><div class="kpi-val">99.9%</div><div class="kpi-lab">SLA (AWS Managed)</div></div>
+    </div>
+    <div style="margin-top:28px; display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+      <div style="background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:18px;">
+        <div style="font-size:22px; margin-bottom:8px;">🏗️</div>
+        <div style="font-size:12px; font-weight:700; color:white; margin-bottom:6px;">Fully Serverless</div>
+        <div style="font-size:11px; opacity:.7; line-height:1.5;">No EC2, no patching, no capacity planning. AWS manages all underlying infrastructure automatically.</div>
+      </div>
+      <div style="background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:18px;">
+        <div style="font-size:22px; margin-bottom:8px;">📈</div>
+        <div style="font-size:12px; font-weight:700; color:white; margin-bottom:6px;">Auto-Scaling</div>
+        <div style="font-size:11px; opacity:.7; line-height:1.5;">Lambda and DynamoDB scale from 0 to thousands of concurrent requests automatically with no configuration.</div>
+      </div>
+      <div style="background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:12px; padding:18px;">
+        <div style="font-size:22px; margin-bottom:8px;">🔮</div>
+        <div style="font-size:12px; font-weight:700; color:white; margin-bottom:6px;">Future Roadmap</div>
+        <div style="font-size:11px; opacity:.7; line-height:1.5;">Add Cognito auth · SNS email notifications · Lambda auto-provisions firewall rules · Approval workflow.</div>
+      </div>
+    </div>
+    <div class="closing">
+      Live URL: https://d3hdlkebrri10x.cloudfront.net/tracker/index.html &nbsp;·&nbsp;
+      GitHub: github.com/shuklarichard123/ritesh-portfolio-
+    </div>
+  </div>
+
+</div><!-- /deck -->
+</body>
+</html>
