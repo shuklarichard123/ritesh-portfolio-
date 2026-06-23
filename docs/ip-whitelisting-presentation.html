@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>IP Whitelisting Request System — Stakeholder Presentation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --navy:#0a1628; --blue:#1a56db; --sky:#3b82f6; --cyan:#06b6d4;
+  --green:#10b981; --orange:#f59e0b; --red:#ef4444; --purple:#7c3aed;
+  --slate:#64748b; --light:#f1f5f9; --white:#ffffff; --border:#e2e8f0;
+}
+body{font-family:'Inter',sans-serif;background:#e8edf5;color:#1e293b;}
+@media print{
+  body{background:white;}
+  .slide{page-break-after:always;box-shadow:none!important;margin:0!important;border-radius:0!important;width:100%!important;}
+  .print-bar{display:none!important;}
+}
+
+/* ── Print bar ── */
+.print-bar{
+  position:sticky;top:0;z-index:100;
+  background:var(--navy);color:white;
+  padding:10px 32px;display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;
+}
+.print-bar span{opacity:.7;}
+.print-btn{
+  background:var(--blue);color:white;border:none;padding:7px 20px;
+  border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+}
+.print-btn:hover{background:#1d4ed8;}
+
+/* ── Deck ── */
+.deck{max-width:1120px;margin:0 auto;padding:32px 24px;}
+
+/* ── Slide base ── */
+.slide{
+  width:100%;aspect-ratio:16/9;
+  background:white;border-radius:18px;
+  box-shadow:0 8px 40px rgba(0,0,0,.13);
+  margin-bottom:44px;overflow:hidden;
+  position:relative;display:flex;flex-direction:column;
+}
+
+/* ── Slide top accent bar ── */
+.slide::before{
+  content:'';display:block;height:5px;width:100%;
+  background:linear-gradient(90deg,var(--blue),var(--cyan),var(--purple));
+  flex-shrink:0;
+}
+
+/* ── Common header ── */
+.s-head{padding:28px 52px 0;}
+.s-eyebrow{font-size:11px;font-weight:700;color:var(--sky);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px;}
+.s-title{font-size:clamp(18px,2.2vw,28px);font-weight:800;color:var(--navy);line-height:1.2;}
+.s-title em{color:var(--blue);font-style:normal;}
+.s-body{flex:1;padding:16px 52px 28px;display:flex;flex-direction:column;}
+</style>
+<style>
+/* ════ SLIDE 1 — Title ════ */
+.s1{background:linear-gradient(140deg,var(--navy) 0%,#1e3a8a 55%,#1d4ed8 100%);color:white;justify-content:center;align-items:center;text-align:center;padding:52px;}
+.s1::before{display:none;}
+.s1 .pill{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:6px 20px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;margin-bottom:24px;display:inline-block;}
+.s1 h1{font-size:clamp(22px,3.2vw,40px);font-weight:900;line-height:1.18;margin-bottom:14px;max-width:800px;}
+.s1 .s1-sub{font-size:clamp(12px,1.4vw,17px);opacity:.72;margin-bottom:36px;max-width:640px;}
+.s1 .meta{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;}
+.s1 .m-item .m-val{font-size:clamp(13px,1.3vw,15px);font-weight:600;}
+.s1 .m-item .m-lab{font-size:11px;opacity:.55;margin-top:2px;}
+
+/* ════ SLIDE 2 — Problem & Solution ════ */
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1;}
+.ps-panel{border-radius:14px;padding:22px;}
+.ps-panel.problem{background:#fff1f2;border:1.5px solid #fecdd3;}
+.ps-panel.solution{background:#f0fdf4;border:1.5px solid #bbf7d0;}
+.ps-panel h3{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.ps-panel.problem h3{color:#be123c;}
+.ps-panel.solution h3{color:#15803d;}
+.ps-panel ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.ps-panel ul li{font-size:12px;line-height:1.55;padding-left:18px;position:relative;color:#374151;}
+.ps-panel ul li::before{position:absolute;left:0;top:0;}
+.ps-panel.problem ul li::before{content:"✗";color:#ef4444;}
+.ps-panel.solution ul li::before{content:"✓";color:#10b981;}
+
+/* ════ SLIDE 3 — How It Works (user journey) ════ */
+.journey{display:flex;align-items:stretch;gap:0;flex:1;margin-top:4px;}
+.j-step{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:16px 12px;position:relative;}
+.j-step:not(:last-child)::after{content:'→';position:absolute;right:-12px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--border);z-index:1;}
+.j-icon{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px;flex-shrink:0;}
+.j-step h4{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.j-step p{font-size:10.5px;color:var(--slate);line-height:1.5;}
+.j-num{font-size:10px;font-weight:800;color:var(--sky);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px;}
+</style>
+<style>
+/* ════ SLIDE 4 — Architecture ════ */
+.arch-wrap{flex:1;display:flex;flex-direction:column;gap:16px;margin-top:4px;}
+.arch-row{display:flex;align-items:center;justify-content:center;gap:6px;}
+.arch-box{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:100px;}
+.arch-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.arch-name{font-size:11px;font-weight:700;color:var(--navy);text-align:center;}
+.arch-svc{font-size:9.5px;color:var(--slate);text-align:center;}
+.arch-arr{font-size:18px;color:#cbd5e1;padding-bottom:20px;flex-shrink:0;}
+.arch-note{display:flex;gap:12px;margin-top:8px;}
+.arch-note-item{flex:1;background:var(--light);border-radius:10px;padding:10px 14px;font-size:10.5px;color:var(--slate);line-height:1.5;}
+.arch-note-item strong{display:block;font-size:11px;color:var(--navy);margin-bottom:3px;}
+.ic-blue{background:linear-gradient(135deg,#dbeafe,#bfdbfe);}
+.ic-orange{background:linear-gradient(135deg,#fef3c7,#fde68a);}
+.ic-cyan{background:linear-gradient(135deg,#cffafe,#a5f3fc);}
+.ic-purple{background:linear-gradient(135deg,#ede9fe,#ddd6fe);}
+.ic-green{background:linear-gradient(135deg,#d1fae5,#a7f3d0);}
+.ic-navy{background:linear-gradient(135deg,#e0e7ff,#c7d2fe);}
+
+/* ════ SLIDE 5 — Form Fields ════ */
+.form-preview{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;flex:1;margin-top:4px;}
+.form-section{border:1px solid var(--border);border-radius:12px;padding:16px;}
+.form-section h4{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--blue);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.form-field{margin-bottom:10px;}
+.form-field .f-label{font-size:10px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.form-field .f-input{background:var(--light);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:10px;color:var(--slate);width:100%;}
+.form-field .f-select{background:var(--light);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:10px;color:var(--slate);width:100%;}
+.form-field .f-checkbox{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px;}
+.form-field .f-chip{background:#dbeafe;color:#1e40af;font-size:9px;font-weight:600;padding:2px 8px;border-radius:999px;}
+.req{color:var(--red);margin-left:1px;}
+
+/* ════ SLIDE 6 — DynamoDB Schema ════ */
+.schema-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;flex:1;margin-top:4px;}
+.schema-table{border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.schema-table table{width:100%;border-collapse:collapse;font-size:11px;}
+.schema-table th{background:var(--navy);color:white;padding:9px 14px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.07em;}
+.schema-table td{padding:8px 14px;border-bottom:1px solid var(--border);color:#374151;vertical-align:top;}
+.schema-table tr:last-child td{border-bottom:none;}
+.schema-table tr:nth-child(even) td{background:#f8fafc;}
+.type-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 7px;border-radius:999px;}
+.t-pk{background:#dbeafe;color:#1e40af;}
+.t-str{background:#d1fae5;color:#065f46;}
+.t-obj{background:#ede9fe;color:#5b21b6;}
+.t-ts{background:#fef3c7;color:#92400e;}
+.schema-info{display:flex;flex-direction:column;gap:12px;}
+.info-card{background:var(--light);border-radius:10px;padding:14px;}
+.info-card h4{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.info-card p{font-size:10.5px;color:var(--slate);line-height:1.55;}
+</style>
+<style>
+/* ════ SLIDE 7 — API Endpoints ════ */
+.api-wrap{display:flex;flex-direction:column;gap:12px;flex:1;margin-top:4px;}
+.api-row{display:grid;grid-template-columns:90px 260px 1fr auto;align-items:center;gap:12px;background:var(--light);border:1px solid var(--border);border-radius:10px;padding:12px 16px;}
+.method{font-size:11px;font-weight:800;padding:4px 10px;border-radius:6px;text-align:center;}
+.m-post{background:#dcfce7;color:#15803d;}
+.m-get{background:#dbeafe;color:#1d4ed8;}
+.api-path{font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:600;color:var(--navy);}
+.api-desc{font-size:11px;color:var(--slate);line-height:1.4;}
+.api-params{font-size:10px;color:var(--slate);font-family:ui-monospace,Consolas,monospace;background:white;border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.api-footer{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px;}
+.api-footer-card{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;}
+.api-footer-card h4{font-size:11px;font-weight:700;color:#0369a1;margin-bottom:4px;}
+.api-footer-card p{font-size:10.5px;color:var(--slate);line-height:1.4;}
+
+/* ════ SLIDE 8 — Summary ════ */
+.s8{background:linear-gradient(140deg,#0a1628 0%,#1e3a8a 60%,#1e40af 100%);color:white;}
+.s8 .s-head{padding-top:32px;}
+.s8 .s-eyebrow{color:#93c5fd;}
+.s8 .s-title{color:white;}
+.s8 .s-title em{color:#60a5fa;}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:16px;}
+.kpi{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:18px;text-align:center;}
+.kpi-v{font-size:clamp(20px,2.5vw,30px);font-weight:900;color:#93c5fd;line-height:1;}
+.kpi-l{font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.07em;margin-top:5px;}
+.roadmap{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px;}
+.rm-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:16px;}
+.rm-card .rm-phase{font-size:10px;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.rm-card h4{font-size:12px;font-weight:700;color:white;margin-bottom:6px;}
+.rm-card p{font-size:10.5px;opacity:.65;line-height:1.5;}
+.s8-url{text-align:center;margin-top:16px;font-size:11px;opacity:.5;}
+</style>
+</style>
+</head>
+<body>
+
+<div class="print-bar">
+  <span>🔐 IP Whitelisting Application — Stakeholder Presentation · 8 Slides</span>
+  <button class="print-btn" onclick="window.print()">🖨 Export PDF</button>
+</div>
+
+<div class="deck">
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 1 — Title
+══════════════════════════════════════════════════ -->
+<div class="slide s1">
+  <div class="pill">Internal Tool · AWS Serverless</div>
+  <h1>External User IP Whitelisting<br>Application Request System</h1>
+  <p class="s1-sub">A serverless, self-service web application for submitting, tracking and managing external IP whitelisting access requests — built on AWS.</p>
+  <div class="meta">
+    <div class="m-item"><div class="m-val">Ritesh Shukla</div><div class="m-lab">Author</div></div>
+    <div class="m-item"><div class="m-val">eu-west-1 (Ireland)</div><div class="m-lab">AWS Region</div></div>
+    <div class="m-item"><div class="m-val">v1.0 — June 2026</div><div class="m-lab">Version</div></div>
+    <div class="m-item"><div class="m-val">~$0 / month</div><div class="m-lab">Running Cost</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 2 — Problem & Solution
+══════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="s-head">
+    <div class="s-eyebrow">Slide 02 · Background</div>
+    <div class="s-title">Problem &amp; <em>Solution</em></div>
+  </div>
+  <div class="s-body">
+    <div class="ps-grid">
+      <div class="ps-panel problem">
+        <h3>⚠️ The Problem — Current State</h3>
+        <ul>
+          <li>IP whitelisting requests raised via email — no standardisation or audit trail</li>
+          <li>No unique tracking ID — impossible to follow up on a specific request</li>
+          <li>Missing critical details (IP, port, protocol, environment) cause delays</li>
+          <li>No record of business justification or named approver</li>
+          <li>Network team manually chase requesters for missing information</li>
+          <li>No visibility into pending, approved or rejected requests</li>
+        </ul>
+      </div>
+      <div class="ps-panel solution">
+        <h3>✅ The Solution — New System</h3>
+        <ul>
+          <li>Structured web form enforces all required fields before submission</li>
+          <li>Every request gets a unique UUID — shareable for tracking and follow-up</li>
+          <li>Captures: IP/CIDR, port, protocol, environment, duration, application name</li>
+          <li>Mandatory business justification and named approver on every request</li>
+          <li>DynamoDB provides permanent, queryable audit trail of all requests</li>
+          <li>Admin view lets network team list and filter requests instantly</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 3 — User Journey
+══════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="s-head">
+    <div class="s-eyebrow">Slide 03 · User Experience</div>
+    <div class="s-title">How It <em>Works</em> — User Journey</div>
+  </div>
+  <div class="s-body">
+    <div class="journey">
+      <div class="j-step">
+        <div class="j-num">Step 1</div>
+        <div class="j-icon ic-blue">🌐</div>
+        <h4>Access the Form</h4>
+        <p>External user opens the web app via CloudFront URL. No login required — publicly accessible.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-num">Step 2</div>
+        <div class="j-icon ic-orange">📋</div>
+        <h4>Fill the Request Form</h4>
+        <p>User enters their name, email, organisation, IP address, port, environment, protocols and business justification.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-num">Step 3</div>
+        <div class="j-icon ic-purple">🚀</div>
+        <h4>Submit &amp; Receive ID</h4>
+        <p>Form validates all fields. On submit, a unique Request ID is generated and displayed immediately.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-num">Step 4</div>
+        <div class="j-icon ic-navy">🗄️</div>
+        <h4>Stored in DynamoDB</h4>
+        <p>All request details are stored permanently in DynamoDB with a timestamp for full audit trail.</p>
+      </div>
+      <div class="j-step">
+        <div class="j-num">Step 5</div>
+        <div class="j-icon ic-green">✅</div>
+        <h4>Admin Reviews</h4>
+        <p>Network admin views all requests, filters by requester, looks up by ID and acts on the whitelist.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px;">
+      <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:12px 14px;font-size:11px;color:#0369a1;"><strong>Tab 1 — New Request</strong><br>Structured form with 3 fieldsets: Requester Details, IP &amp; Access Details, Justification &amp; Approval.</div>
+      <div style="background:#faf5ff;border:1px solid #ddd6fe;border-radius:10px;padding:12px 14px;font-size:11px;color:#6b21a8;"><strong>Tab 2 — View Requests</strong><br>Table view of all submissions. Filter by name. Click Request ID to copy. Status badges: Pending / Approved / Rejected.</div>
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px 14px;font-size:11px;color:#166534;"><strong>Tab 3 — Lookup by ID</strong><br>Paste any Request ID to retrieve full details including justification, approver and all IP parameters.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 4 — Technical Architecture
+══════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="s-head">
+    <div class="s-eyebrow">Slide 04 · Architecture</div>
+    <div class="s-title">Technical <em>Architecture</em></div>
+  </div>
+  <div class="s-body">
+    <div class="arch-wrap">
+      <div class="arch-row">
+        <div class="arch-box">
+          <div class="arch-icon ic-blue">🧑‍💻</div>
+          <div class="arch-name">External User</div>
+          <div class="arch-svc">Web Browser</div>
+        </div>
+        <div class="arch-arr">→</div>
+        <div class="arch-box">
+          <div class="arch-icon ic-orange">☁️</div>
+          <div class="arch-name">CloudFront</div>
+          <div class="arch-svc">CDN · HTTPS · Edge Cache</div>
+        </div>
+        <div class="arch-arr">→</div>
+        <div class="arch-box">
+          <div class="arch-icon ic-cyan">🪣</div>
+          <div class="arch-name">S3 Bucket</div>
+          <div class="arch-svc">HTML · CSS · JS</div>
+        </div>
+        <div class="arch-arr" style="opacity:.3;">—</div>
+        <div class="arch-box" style="opacity:.35;">
+          <div class="arch-icon" style="background:#f1f5f9;">👤</div>
+          <div class="arch-name">Admin User</div>
+          <div class="arch-svc">Same URL</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;font-size:18px;color:#cbd5e1;">↓ API calls (fetch)</div>
+      <div class="arch-row">
+        <div class="arch-box">
+          <div class="arch-icon ic-purple">🔗</div>
+          <div class="arch-name">API Gateway</div>
+          <div class="arch-svc">REST · /prod · CORS</div>
+        </div>
+        <div class="arch-arr">→</div>
+        <div class="arch-box">
+          <div class="arch-icon ic-green" style="font-size:20px;font-weight:800;">λ</div>
+          <div class="arch-name">Lambda</div>
+          <div class="arch-svc">Python 3.12 · 128MB</div>
+        </div>
+        <div class="arch-arr">→</div>
+        <div class="arch-box">
+          <div class="arch-icon ic-navy">🗄️</div>
+          <div class="arch-name">DynamoDB</div>
+          <div class="arch-svc">user-tracker table</div>
+        </div>
+        <div class="arch-arr" style="opacity:.3;">—</div>
+        <div class="arch-box">
+          <div class="arch-icon" style="background:#fef3c7;">📊</div>
+          <div class="arch-name">CloudWatch</div>
+          <div class="arch-svc">Logs · Monitoring</div>
+        </div>
+      </div>
+      <div class="arch-note">
+        <div class="arch-note-item"><strong>🔒 IAM Security</strong>Lambda runs with least-privilege role — only PutItem, GetItem, Scan, Query on the user-tracker table. No other AWS access.</div>
+        <div class="arch-note-item"><strong>🌍 Global Delivery</strong>CloudFront distributes from 400+ edge locations. HTTPS enforced. SPA routing via custom 403→index.html error rule.</div>
+        <div class="arch-note-item"><strong>📦 Serverless</strong>Zero servers to manage. Lambda scales from 0 to thousands of concurrent requests. DynamoDB on-demand — no capacity planning.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 5 — Form Fields
+══════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="s-head">
+    <div class="s-eyebrow">Slide 05 · Form Design</div>
+    <div class="s-title">Request Form — <em>Field Structure</em></div>
+  </div>
+  <div class="s-body">
+    <div class="form-preview">
+      <div class="form-section">
+        <h4>👤 Requester Details</h4>
+        <div class="form-field">
+          <div class="f-label">Full Name <span class="req">*</span></div>
+          <div class="f-input">e.g. Ritesh Shukla</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Email Address <span class="req">*</span></div>
+          <div class="f-input">e.g. ritesh@company.com</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Organisation / Team <span class="req">*</span></div>
+          <div class="f-input">e.g. IBM Cloud Infrastructure Team</div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h4>🌐 IP &amp; Access Details</h4>
+        <div class="form-field">
+          <div class="f-label">IP Address / CIDR Range <span class="req">*</span></div>
+          <div class="f-input">e.g. 203.0.113.45 or 203.0.113.0/24</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Port / Port Range <span class="req">*</span></div>
+          <div class="f-input">e.g. 443 or 8080-8090</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Target Environment <span class="req">*</span></div>
+          <div class="f-select">▾ Production / Staging / Dev / UAT</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Access Duration <span class="req">*</span></div>
+          <div class="f-select">▾ 7 Days / 30 Days / 90 Days / Permanent</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Application / Service Name <span class="req">*</span></div>
+          <div class="f-input">e.g. Customer Portal, Portfolio API</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Protocol</div>
+          <div class="f-checkbox">
+            <span class="f-chip">✓ HTTPS</span>
+            <span class="f-chip">HTTP</span>
+            <span class="f-chip">SSH</span>
+            <span class="f-chip">TCP</span>
+            <span class="f-chip">UDP</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <h4>📋 Justification &amp; Approval</h4>
+        <div class="form-field">
+          <div class="f-label">Business Justification <span class="req">*</span></div>
+          <div class="f-input" style="height:64px;display:flex;align-items:flex-start;padding-top:6px;">Describe why this IP needs access and what it will be used for…</div>
+        </div>
+        <div class="form-field">
+          <div class="f-label">Approver Name <span class="req">*</span></div>
+          <div class="f-input">e.g. John Smith (Manager)</div>
+        </div>
+        <div style="margin-top:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;font-size:10px;color:#166534;line-height:1.5;">
+          ✅ On submit, a <strong>unique Request ID</strong> is generated and displayed. Save it to track your request status.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 6 — Data Model
+══════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="s-head">
+    <div class="s-eyebrow">Slide 06 · Data Storage</div>
+    <div class="s-title">DynamoDB <em>Data Model</em></div>
+  </div>
+  <div class="s-body">
+    <div class="schema-wrap">
+      <div class="schema-table">
+        <table>
+          <thead><tr><th>Attribute</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><strong>request_id</strong></td><td><span class="type-badge t-pk">PK · UUID</span></td><td>Auto-generated unique identifier for every request</td></tr>
+            <tr><td>username</td><td><span class="type-badge t-str">String</span></td><td>Full name of the requester (GSI partition key)</td></tr>
+            <tr><td>requested_data</td><td><span class="type-badge t-str">String</span></td><td>Organisation or team name of the requester</td></tr>
+            <tr><td>input_parameters</td><td><span class="type-badge t-obj">Map (JSON)</span></td><td>Nested object containing all IP/access fields below</td></tr>
+            <tr><td>↳ ip_address</td><td><span class="type-badge t-str">String</span></td><td>IPv4 address or CIDR block (e.g. 10.0.0.0/16)</td></tr>
+            <tr><td>↳ port</td><td><span class="type-badge t-str">String</span></td><td>Port number or range (e.g. 443 or 8080-8090)</td></tr>
+            <tr><td>↳ environment</td><td><span class="type-badge t-str">String</span></td><td>Target environment: Production / Staging / Dev / UAT</td></tr>
+            <tr><td>↳ access_duration</td><td><span class="type-badge t-str">String</span></td><td>7 Days / 30 Days / 90 Days / Permanent</td></tr>
+            <tr><td>↳ protocols</td><td><span class="type-badge t-obj">List</span></td><td>Array of protocols: HTTPS, HTTP, SSH, TCP, UDP</td></tr>
+            <tr><td>↳ business_justification</td><td><span class="type-badge t-str">String</span></td><td>Free-text business reason for the access request</td></tr>
+            <tr><td>↳ approver_name</td><td><span class="type-badge t-str">String</span></td><td>Name of the approving manager or authority</td></tr>
+            <tr><td>↳ requester_email</td><td><span class="type-badge t-str">String</span></td><td>Email address of the requester for follow-up</td></tr>
+            <tr><td>created_at</td><td><span class="type-badge t-ts">Timestamp</span></td><td>ISO 8601 UTC timestamp of submission</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="schema-info">
+        <div class="info-card"><h4>🔑 Primary Key</h4><p><strong>request_id</strong> (UUID v4) is the partition key. Globally unique — no hot partitions. Enables O(1) lookup by ID.</p></div>
+        <div class="info-card"><h4>📇 Global Secondary Index</h4><p><strong>username-index</strong> on the username attribute. Allows admin to query all requests by a specific requester instantly.</p></div>
+        <div class="info-card"><h4>💰 Billing Mode</h4><p><strong>PAY_PER_REQUEST</strong> — no provisioned capacity. Zero cost when idle. Scales automatically with traffic.</p></div>
+        <div class="info-card"><h4>📦 Storage</h4><p>Each record is ~1–2 KB. 25 GB free tier storage — can store millions of requests at zero cost.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 7 — API Reference
+══════════════════════════════════════════════════ -->
+<div class="slide">
+  <div class="s-head">
+    <div class="s-eyebrow">Slide 07 · API</div>
+    <div class="s-title">REST API <em>Endpoints</em></div>
+  </div>
+  <div class="s-body">
+    <div class="api-wrap">
+      <div class="api-row">
+        <span class="method m-post">POST</span>
+        <span class="api-path">/prod/records</span>
+        <span class="api-desc">Submit a new IP whitelisting request. Validates all required fields, generates a UUID request_id and writes to DynamoDB.</span>
+        <span class="api-params">Body: JSON with username, requested_data, input_parameters</span>
+      </div>
+      <div class="api-row">
+        <span class="method m-get">GET</span>
+        <span class="api-path">/prod/records</span>
+        <span class="api-desc">Retrieve all whitelisting requests. Returns list sorted newest first. Supports optional username filter via query string.</span>
+        <span class="api-params">?username=ritesh.shukla (optional)</span>
+      </div>
+      <div class="api-row">
+        <span class="method m-get">GET</span>
+        <span class="api-path">/prod/records/{request_id}</span>
+        <span class="api-desc">Fetch a single request by its unique ID. Returns full record including all IP parameters, justification and approver details.</span>
+        <span class="api-params">Path: UUID request_id</span>
+      </div>
+    </div>
+    <div class="api-footer">
+      <div class="api-footer-card">
+        <h4>🔗 Base URL</h4>
+        <p style="font-family:ui-monospace,monospace;font-size:10px;word-break:break-all;">https://517p6ffpyi.execute-api.<br>eu-west-1.amazonaws.com/prod</p>
+      </div>
+      <div class="api-footer-card">
+        <h4>🔒 Authentication</h4>
+        <p>Currently open (no auth). Can add AWS Cognito or API Key in a future iteration for admin-only access to GET endpoints.</p>
+      </div>
+      <div class="api-footer-card">
+        <h4>🌐 CORS</h4>
+        <p>All endpoints return <code>Access-Control-Allow-Origin: *</code> headers enabling browser-to-API calls from any domain.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     SLIDE 8 — Summary & Roadmap
+══════════════════════════════════════════════════ -->
+<div class="slide s8">
+  <div class="s-head">
+    <div class="s-eyebrow">Slide 08 · Summary</div>
+    <div class="s-title">Summary &amp; <em>Next Steps</em></div>
+  </div>
+  <div class="s-body" style="padding-top:12px;">
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-v">~$0</div><div class="kpi-l">Monthly Cost</div></div>
+      <div class="kpi"><div class="kpi-v">5</div><div class="kpi-l">AWS Services</div></div>
+      <div class="kpi"><div class="kpi-v">0</div><div class="kpi-l">Servers to Manage</div></div>
+      <div class="kpi"><div class="kpi-v">11</div><div class="kpi-l">Captured Fields</div></div>
+    </div>
+    <div class="roadmap">
+      <div class="rm-card">
+        <div class="rm-phase">✅ Phase 1 — Live Now</div>
+        <h4>Request Submission &amp; Storage</h4>
+        <p>Web form with 11 structured fields. Unique Request ID. DynamoDB storage. Admin list &amp; lookup views. CloudFront global delivery.</p>
+      </div>
+      <div class="rm-card">
+        <div class="rm-phase">🔜 Phase 2 — Planned</div>
+        <h4>Notifications &amp; Approval Workflow</h4>
+        <p>SNS email alert to network team on submission. Approve / Reject buttons that update DynamoDB status. Requester email confirmation via SES.</p>
+      </div>
+      <div class="rm-card">
+        <div class="rm-phase">🔮 Phase 3 — Future</div>
+        <h4>Automated Provisioning</h4>
+        <p>On approval, Lambda auto-provisions the security group rule via AWS SDK. Full audit trail from request to rule creation. Cognito auth for admin.</p>
+      </div>
+    </div>
+    <div class="s8-url">
+      Live App: https://d3hdlkebrri10x.cloudfront.net/tracker/index.html &nbsp;·&nbsp;
+      API: https://517p6ffpyi.execute-api.eu-west-1.amazonaws.com/prod
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+</body>
+</html>
